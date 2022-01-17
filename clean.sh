@@ -1,0 +1,6 @@
+#!/bin/bash
+
+java_file=$(sshpass -p $TF_VAR_nsx_password ssh -o StrictHostKeyChecking=no root@$TF_VAR_nsx_manager ls /usr/share/corfu/lib/corfudb-tools-*-shaded.jar)
+cmd=$(echo "service idps-reporting-service stop && java -cp $java_file org.corfudb.browser.CorfuStoreBrowserMain --host=$TF_VAR_nsx_manager --port=9040 --namespace=security_data_service --tablename=ids_event_data --operation=dropTable --tlsEnabled=true --keystore=/config/cluster-manager/corfu/private/keystore.jks --ks_password=/config/cluster-manager/corfu/private/keystore.password --truststore=/config/cluster-manager/corfu/public/truststore.jks --truststore_password=/config/cluster-manager/corfu/public/truststore.password && curl -X PUT -H \"Content-Type: application/json\" \"localhost:9200/security_data_service_metadata/_doc/security_data_service?pretty\" -d' {\"clusterId\" : \"-1\"}' && service idps-reporting-service start")
+
+echo $cmd | xargs sshpass -p $TF_VAR_nsx_password ssh -o StrictHostKeyChecking=no root@$TF_VAR_nsx_manager
